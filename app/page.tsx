@@ -19,6 +19,7 @@ type TabValue = "explain" | "question";
 const EXPLAIN_PROMPTS: Array<{ label: string; prompt: string; mode?: QuestionSeed["mode"] }> = [
   { label: "Bernoulli Basics", prompt: "Explain Bernoulli's principle like I am brand new to it." },
   { label: "Simple Version", prompt: "Explain why fluid moves faster in a narrow pipe.", mode: "simpler" },
+  { label: "Tighter Summary", prompt: "Explain buoyancy in a tighter high-yield way.", mode: "tighter" },
   { label: "Another Framing", prompt: "Explain Bernoulli another way with intuition first.", mode: "another_way" },
   { label: "Analogy Focus", prompt: "Give another analogy for Bernoulli's principle.", mode: "another_analogy" },
 ];

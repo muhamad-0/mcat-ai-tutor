@@ -13,13 +13,69 @@ interface ParsedQuestionBlock {
   explanation: string;
 }
 
+function cleanMathPayload(input: string): string {
+  const cleaned = input
+    .trim()
+    .replace(/^\$+/, "")
+    .replace(/\$+$/, "")
+    .replace(/^\\\[/, "")
+    .replace(/\\\]$/, "")
+    .replace(/^\\\(/, "")
+    .replace(/\\\)$/, "")
+    .replace(/\\\\([a-zA-Z]+)/g, "\\$1")
+    .trim();
+
+  return cleaned.replace(
+    /(^|[^\\])\b(frac|text|rho|sqrt|cdot|times|Delta|approx|left|right)\b/g,
+    "$1\\\\$2",
+  );
+}
+
+function normalizeMathDelimiters(input: string): string {
+  let output = input.replace(/\r\n/g, "\n");
+
+  // Unescape literal dollars emitted by model.
+  output = output.replace(/\\\$/g, "$");
+
+  // Normalize both well-formed and partially malformed LaTeX delimiters.
+  output = output
+    .replace(/\\\[/g, "$$")
+    .replace(/\\\]/g, "$$")
+    .replace(/\\\(/g, "$")
+    .replace(/\\\)/g, "$");
+
+  // Clean existing display math blocks.
+  output = output.replace(/\$\$([\s\S]*?)\$\$/g, (_m, expr) => `$$${cleanMathPayload(expr)}$$`);
+  // Clean existing inline math blocks.
+  output = output.replace(/(?<!\$)\$([^\n$]+?)\$(?!\$)/g, (_m, expr) => `$${cleanMathPayload(expr)}$`);
+
+  // If a line has latex-like content but odd inline delimiters, close it.
+  output = output
+    .split("\n")
+    .map((line) => {
+      if (line.includes("$$") && !/^\s*\$\$[\s\S]*\$\$\s*$/.test(line.trim())) {
+        line = line.replace(/\$\$([\s\S]*?)\$\$/g, (_m, expr) => `$${cleanMathPayload(expr)}$`);
+      }
+
+      const dollarCount = (line.match(/\$/g) ?? []).length;
+      const looksMathy = /\\(text|frac|rho|sqrt|cdot|times|Delta|approx)|[_^{}]/.test(line);
+      if (looksMathy && dollarCount % 2 === 1) {
+        return `${line}$`;
+      }
+      return line;
+    })
+    .join("\n");
+
+  return output;
+}
+
 function normalizeQuestionBlock(input: string): string {
   let output = input.replace(/\r\n/g, "\n");
   output = output.replace(/\*\*(Question|Correct Answer|Explanation)\*\*/gi, "$1");
   output = output.replace(/\*\*([ABCD])\*\*/g, "$1");
   output = output.replace(/^(#+\s*)?(Question|Correct Answer|Explanation)\s*[:\-]?\s*/gim, "$2: ");
   output = output.replace(/^(#+\s*)?([ABCD])\s*[\)\].\-:]\s*/gim, "$2) ");
-  return output;
+  return normalizeMathDelimiters(output);
 }
 
 function parseQuestionBlock(input: string): ParsedQuestionBlock | null {

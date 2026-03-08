@@ -15,6 +15,7 @@ import { ExplainMode, SourceCitation } from "@/lib/types";
 const MODE_OPTIONS: Array<{ value: ExplainMode; label: string }> = [
   { value: "default", label: "Standard explanation" },
   { value: "simpler", label: "Break it down simpler" },
+  { value: "tighter", label: "Keep it tighter" },
   { value: "another_way", label: "Explain another way" },
   { value: "another_analogy", label: "Give me an analogy" },
 ];

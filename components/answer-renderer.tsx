@@ -105,7 +105,7 @@ function parseSections(answer: string): Partial<Record<SectionName, string>> | n
 }
 
 function cleanMathPayload(input: string): string {
-  return input
+  const cleaned = input
     .trim()
     .replace(/^\$+/, "")
     .replace(/\$+$/, "")
@@ -116,6 +116,12 @@ function cleanMathPayload(input: string): string {
     .replace(/\\\\(?=[()[\]{}])/g, "\\")
     .replace(/\\\\([a-zA-Z]+)/g, "\\$1")
     .trim();
+
+  // Recover common LaTeX commands when model omits the leading backslash.
+  return cleaned.replace(
+    /(^|[^\\])\b(frac|text|rho|sqrt|cdot|times|Delta|approx|left|right)\b/g,
+    "$1\\\\$2",
+  );
 }
 
 function isEquationLikeLine(line: string): boolean {
@@ -147,6 +153,11 @@ function normalizeTutorMath(text: string): string {
   });
 
   const lines = output.split("\n").map((line) => {
+    // If $$...$$ appears inline with other sentence text, convert it to inline $...$.
+    if (line.includes("$$") && !/^\s*\$\$[\s\S]*\$\$\s*$/.test(line.trim())) {
+      line = line.replace(/\$\$([\s\S]*?)\$\$/g, (_m, expr) => `$${cleanMathPayload(expr)}$`);
+    }
+
     const trimmed = line.trim();
     if (!trimmed || trimmed.includes("$")) return line;
     if (isEquationLikeLine(trimmed)) {

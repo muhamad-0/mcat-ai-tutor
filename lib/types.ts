@@ -3,6 +3,7 @@ import { z } from "zod";
 export const ExplainModeSchema = z.enum([
   "default",
   "simpler",
+  "tighter",
   "another_way",
   "another_analogy",
 ]);
@@ -60,4 +61,3 @@ export interface RetrievalResult {
   sources: SourceCitation[];
   context: string;
 }
-

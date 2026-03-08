@@ -25,6 +25,10 @@ function queryVariants(query: string, mode?: ExplainMode): string[] {
     variants.push(`${query} basic intuition simple language`, `${query} first-principles explanation`);
   }
 
+  if (mode === "tighter" || lower.includes("tighter") || lower.includes("concise") || lower.includes("brief")) {
+    variants.push(`${query} concise core concept`, `${query} high-yield MCAT summary`);
+  }
+
   if (mode === "another_way" || lower.includes("another way")) {
     variants.push(`${query} alternate explanation`, `${query} conceptual reframing`);
   }

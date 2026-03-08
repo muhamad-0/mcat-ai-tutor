@@ -17,6 +17,8 @@ function styleDirective(mode: ExplainMode): string {
   switch (mode) {
     case "simpler":
       return "Use plain language, very clear steps, and minimal jargon.";
+    case "tighter":
+      return "Be tighter and concise: keep each section short, high-signal, and no unnecessary narration.";
     case "another_way":
       return "Reframe the concept from a different angle than a standard textbook explanation.";
     case "another_analogy":
@@ -43,6 +45,7 @@ Think Through It
 Analogy
 MCAT Trap
 Memory Rule
+- Toolkit must contain 3 to 5 bullet items only.
 
 ${PROMPT_GUARDS}
 `.trim();
@@ -67,6 +70,7 @@ Retrieved context:
 ${args.context}
 
 Write a tutor-style response with the required section headers exactly.
+Toolkit must have 3 to 5 bullet points.
 `.trim();
 }
 
@@ -96,6 +100,8 @@ Think Through It
 Analogy
 MCAT Trap
 Memory Rule
+
+Inside "Toolkit", provide 3 to 5 bullet items only.
 
 ${PROMPT_GUARDS}
 `.trim();

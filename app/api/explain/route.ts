@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 import { generateOpenRouterCompletion } from "@/lib/openrouter";
 import { buildExplanationUserPrompt, getExplanationSystemPrompt } from "@/lib/prompts";
 import { searchRelevantChunks } from "@/lib/retrieval";
+import { enforceToolkitItemCount } from "@/lib/response-guards";
 import { ExplainRequestSchema } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -20,12 +21,13 @@ export async function POST(request: Request) {
         context: retrieval.context,
         hasContext: retrieval.chunks.length > 0,
       }),
-      temperature: parsed.mode === "another_analogy" ? 0.45 : 0.3,
+      temperature: parsed.mode === "another_analogy" ? 0.45 : parsed.mode === "tighter" ? 0.2 : 0.3,
       maxTokens: 950,
     });
+    const normalizedAnswer = enforceToolkitItemCount(answer);
 
     return NextResponse.json({
-      answer,
+      answer: normalizedAnswer,
       sources: retrieval.sources,
     });
   } catch (error) {
@@ -43,4 +45,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-
