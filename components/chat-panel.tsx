@@ -5,7 +5,7 @@ import { Loader2, MessageCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { AnswerRenderer } from "@/components/answer-renderer";
@@ -36,6 +36,7 @@ export function ChatPanel({ seed }: ChatPanelProps) {
   const [sources, setSources] = useState<SourceCitation[]>([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const selectedModeLabel = MODE_OPTIONS.find((option) => option.value === mode)?.label ?? "Standard explanation";
 
   useEffect(() => {
     if (!seed) return;
@@ -117,7 +118,7 @@ export function ChatPanel({ seed }: ChatPanelProps) {
               </label>
               <Select value={mode} onValueChange={(value) => setMode(value as ExplainMode)}>
                 <SelectTrigger id="mode-selector" className="h-11 border-primary/20 bg-background/80 text-base">
-                  <SelectValue />
+                  <span className="line-clamp-1">{selectedModeLabel}</span>
                 </SelectTrigger>
                 <SelectContent>
                   {MODE_OPTIONS.map((option) => (

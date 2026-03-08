@@ -37,6 +37,39 @@ const SECTION_META: Record<
   "Memory Rule": { icon: GraduationCap, accent: "text-emerald-600 dark:text-emerald-400" },
 };
 
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function normalizeSectionLabels(input: string): string {
+  let output = input.replace(/\r\n/g, "\n");
+  const headings = [...SECTION_ORDER];
+
+  for (const heading of headings) {
+    const escaped = escapeRegex(heading);
+
+    // Turn markdown/bold heading variants into plain heading lines.
+    output = output.replace(
+      new RegExp(`(^|\\n)\\s*[#>*-]*\\s*\\*{0,2}${escaped}\\*{0,2}\\s*:?[ \\t]*`, "gim"),
+      `$1${heading}\n`,
+    );
+
+    // Split inline headings that appear after sentence text.
+    output = output.replace(
+      new RegExp(`([.?!])\\s+\\*{0,2}${escaped}\\*{0,2}\\s*:?[ \\t]*`, "gi"),
+      `$1\n\n${heading}\n`,
+    );
+
+    // Split headings chained in same paragraph: "... Toolkit ... Think Through It ..."
+    output = output.replace(
+      new RegExp(`\\s+\\*{0,2}${escaped}\\*{0,2}\\s*:?[ \\t]+`, "gi"),
+      `\n${heading}\n`,
+    );
+  }
+
+  return output.replace(/\n{3,}/g, "\n\n").trim();
+}
+
 function normalizeHeading(line: string): SectionName | null {
   const cleaned = line.replace(/^#{1,4}\s*/, "").replace(/:$/, "").trim().toLowerCase();
   if (cleaned === "toolkit") return "Toolkit";
@@ -48,7 +81,7 @@ function normalizeHeading(line: string): SectionName | null {
 }
 
 function parseSections(answer: string): Partial<Record<SectionName, string>> | null {
-  const lines = answer.split(/\r?\n/);
+  const lines = normalizeSectionLabels(answer).split(/\r?\n/);
   const sections: Partial<Record<SectionName, string>> = {};
   let current: SectionName | null = null;
 
@@ -96,9 +129,16 @@ function isEquationLikeLine(line: string): boolean {
 function normalizeTutorMath(text: string): string {
   let output = text.replace(/\r\n/g, "\n");
 
+  // Unescape model-produced dollar signs so math delimiters are parsable.
+  output = output.replace(/\\\$/g, "$");
+
   // Convert escaped LaTeX delimiters to markdown math delimiters.
   output = output.replace(/\\\[\s*([\s\S]*?)\s*\\\]/g, (_m, expr) => `$$${cleanMathPayload(expr)}$$`);
   output = output.replace(/\\\(\s*([\s\S]*?)\s*\\\)/g, (_m, expr) => `$${cleanMathPayload(expr)}$`);
+
+  // Clean malformed existing delimiter blocks, e.g. $$$P...$$ or $...$ with stray dollars.
+  output = output.replace(/\$\$([\s\S]*?)\$\$/g, (_m, expr) => `$$${cleanMathPayload(expr)}$$`);
+  output = output.replace(/(?<!\$)\$([^\n$]+?)\$(?!\$)/g, (_m, expr) => `$${cleanMathPayload(expr)}$`);
 
   // Convert literal bracket equation lines like: [ p_1 + ... = p_2 + ... ]
   output = output.replace(/^\s*\[(.*)\]\s*$/gm, (_m, expr) => {

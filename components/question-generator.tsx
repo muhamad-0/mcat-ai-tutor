@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AnswerRenderer } from "@/components/answer-renderer";
+import { QuestionBlockRenderer } from "@/components/question-block-renderer";
 import { SourceCards } from "@/components/source-cards";
 import { SourceCitation } from "@/lib/types";
 
@@ -140,7 +140,7 @@ export function QuestionGenerator({ seed }: QuestionGeneratorProps) {
 
       {questionBlock ? (
         <>
-          <AnswerRenderer answer={questionBlock} />
+          <QuestionBlockRenderer text={questionBlock} />
           <SourceCards sources={sources} />
         </>
       ) : null}
