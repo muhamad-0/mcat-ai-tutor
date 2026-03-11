@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import { AppHeader } from "@/components/app-header";
 import { ChatPanel, type QuestionSeed } from "@/components/chat-panel";
 import { QuestionGenerator, type TopicSeed } from "@/components/question-generator";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -12,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import { Atom, Beaker, Brain, Compass, Menu, MessageCircle, PenLine, Sparkles } from "lucide-react";
+import { Atom, Beaker, Compass, Menu, MessageCircle, PenLine } from "lucide-react";
 
 type TabValue = "explain" | "question";
 
@@ -56,63 +55,50 @@ export default function Home() {
 
   const sidePanel = (
     <div className="space-y-4">
-      <Card className="border-primary/20 bg-gradient-to-b from-primary/10 to-card shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base uppercase tracking-wide text-muted-foreground">
-            <Compass className="size-4 text-primary" />
-            Quick Start Prompts
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {EXPLAIN_PROMPTS.map((item) => (
-            <Button
-              key={item.label}
-              variant="outline"
-              className="h-auto w-full justify-start border-primary/20 bg-background/70 px-3 py-2.5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/5"
-              onClick={() => applyExplainPrompt(item.prompt, item.mode)}
-            >
-              <span className="text-sm font-semibold">{item.label}</span>
-            </Button>
-          ))}
-        </CardContent>
-      </Card>
-
-      <Card className="border-primary/20 shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base uppercase tracking-wide text-muted-foreground">
-            <Beaker className="size-4 text-primary" />
-            MCAT Topic Boosters
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {TOPIC_PROMPTS.map((topic) => (
-            <Button
-              key={topic}
-              variant="ghost"
-              className="h-auto w-full justify-start rounded-lg px-3 py-2.5 text-left text-base transition-colors hover:bg-primary/8"
-              onClick={() => applyTopicPrompt(topic)}
-            >
-              {topic}
-            </Button>
-          ))}
-        </CardContent>
-      </Card>
-
-      <Card className="border-primary/20 bg-accent/20 shadow-sm">
-        <CardContent className="pt-5">
-          <div className="flex items-start gap-3">
-            <div className="rounded-lg bg-primary/10 p-2 text-primary">
-              <Sparkles className="size-4" />
-            </div>
-            <div className="space-y-1">
-              <p className="text-base font-semibold">Study tactic</p>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                Ask once in Standard mode, then repeat in Another way mode to catch hidden assumptions.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {activeTab === "explain" && (
+        <Card className="border-primary/20 bg-gradient-to-b from-primary/10 to-card shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base uppercase tracking-wide text-muted-foreground">
+              <Compass className="size-4 text-primary" />
+              Quick Start Prompts
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {EXPLAIN_PROMPTS.map((item) => (
+              <Button
+                key={item.label}
+                variant="outline"
+                className="h-auto w-full justify-start border-primary/20 bg-background/70 px-3 py-2.5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/5"
+                onClick={() => applyExplainPrompt(item.prompt, item.mode)}
+              >
+                <span className="text-sm font-semibold">{item.label}</span>
+              </Button>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+      {activeTab === "question" && (
+        <Card className="border-primary/20 shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base uppercase tracking-wide text-muted-foreground">
+              <Beaker className="size-4 shrink-0 text-primary" />
+              <span>Practice Topics</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {TOPIC_PROMPTS.map((topic) => (
+              <Button
+                key={topic}
+                variant="ghost"
+                className="h-auto min-w-0 w-full justify-start whitespace-normal break-words rounded-lg px-3 py-2.5 text-left text-base font-medium transition-colors hover:bg-primary/8"
+                onClick={() => applyTopicPrompt(topic)}
+              >
+                {topic}
+              </Button>
+            ))}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 
@@ -143,10 +129,6 @@ export default function Home() {
               <PenLine className="mr-1.5 size-4" />
               Practice
             </Button>
-            <Badge variant="secondary" className="ml-1 text-sm">
-              <Brain className="mr-1 size-3.5" />
-              RAG powered
-            </Badge>
           </div>
           <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
             <SheetTrigger className="inline-flex size-9 items-center justify-center rounded-md border border-input bg-background shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring md:hidden">
